@@ -1,9 +1,5 @@
 {
-  "appId": "ua.blokpad.app",
+  "appId": "com.blokpad.app",
   "appName": "Блок-Пад",
-  "webDir": "www",
-  "server": {
-    "androidScheme": "https"
-  }
+  "webDir": "www"
 }
- 

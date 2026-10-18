@@ -2,15 +2,10 @@
   "name": "blok-pad",
   "version": "1.0.0",
   "private": true,
-  "description": "Блок-Пад — офлайн волейбольна звукова панель для Android",
-  "scripts": {
-    "build:android": "cap sync android"
-  },
+  "description": "Блок-Пад: звукова панель для матчу",
   "dependencies": {
-    "@capacitor/android": "^7.0.0",
-    "@capacitor/core": "^7.0.0"
-  },
-  "devDependencies": {
-    "@capacitor/cli": "^7.0.0"
+    "@capacitor/android": "6.1.2",
+    "@capacitor/cli": "6.1.2",
+    "@capacitor/core": "6.1.2"
   }
 }
