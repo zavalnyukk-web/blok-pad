@@ -1,8 +1,8 @@
 {
-  "name": "blok-pad",
+  "name": "golos-kunytsi",
   "version": "1.0.0",
   "private": true,
-  "description": "Блок-Пад: звукова панель для матчу",
+  "description": "Голос Куниці: звукова панель для матчу",
   "dependencies": {
     "@capacitor/android": "6.1.2",
     "@capacitor/cli": "6.1.2",
