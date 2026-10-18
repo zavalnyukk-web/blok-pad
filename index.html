@@ -3,56 +3,353 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0c1624">
 <title>Блок-Пад</title>
-<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
 <style>
-:root{--bg:#0c1624;--surface:#15233a;--ink:#e9eff7;--muted:#92a3ba;--line:#26384f;--blue:#3d82e8;--yellow:#f4c430;--red:#ee6454;--teal:#2bb5a6}
-*{box-sizing:border-box}body{margin:0;padding:env(safe-area-inset-top) 16px calc(20px + env(safe-area-inset-bottom));background:var(--bg);color:var(--ink);font:16px system-ui,-apple-system,sans-serif}
-.wrap{max-width:800px;margin:auto;display:flex;flex-direction:column;gap:16px}header{padding-top:16px;display:flex;justify-content:space-between;align-items:end;gap:10px}h1{font-size:clamp(2.3rem,9vw,3.5rem);line-height:.95;margin:0;font-weight:900;letter-spacing:-.04em}h1 span{color:var(--blue)}.sub{color:var(--muted);margin:8px 0 0;font-size:.9rem}
-.bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px}.vol{display:flex;align-items:center;gap:8px;flex:1;min-width:150px;color:var(--muted);font-size:.85rem}.vol input{width:100%;accent-color:var(--blue)}button{font:600 .9rem system-ui;cursor:pointer;touch-action:manipulation}.btn{border:1px solid var(--line);border-radius:9px;background:transparent;color:var(--ink);padding:10px 12px;min-height:44px}.stop{background:var(--red);border-color:var(--red);color:#250805}.on{background:var(--ink);color:var(--bg)}
-.msg{min-height:1.2em;color:var(--yellow);font-size:.88rem}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.pad{min-width:0;display:flex;flex-direction:column;gap:8px}.hit{position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;text-align:left;gap:12px;padding:16px;min-height:142px;border:0;border-radius:14px;background:var(--c);color:var(--ci);box-shadow:0 4px 0 #0005}.hit:active{transform:translateY(3px);box-shadow:none}.hit .name{font-size:clamp(1.35rem,5.5vw,1.9rem);font-weight:900;line-height:1;text-transform:uppercase;overflow-wrap:anywhere}.state{font-size:.8rem;font-weight:700;opacity:.9}.prog{position:absolute;left:0;bottom:0;height:6px;width:0;background:currentColor;opacity:.5}.playing{outline:3px solid var(--ink);outline-offset:2px}.empty{background:transparent!important;color:var(--muted)!important;border:2px dashed var(--line)!important;box-shadow:none}.c0{--c:var(--blue);--ci:#06142a}.c1{--c:var(--yellow);--ci:#11233b}.c2{--c:var(--red);--ci:#fff}.c3{--c:var(--teal);--ci:#04201d}.edit{display:flex;flex-direction:column;gap:6px}.edit input{width:100%;min-height:42px;padding:9px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;font:inherit}.row{display:flex;gap:6px}.row .btn{flex:1;padding:7px 5px}.add{min-height:142px;border:2px dashed var(--line);border-radius:14px;background:transparent;color:var(--muted);font-size:1.1rem;font-weight:800}.note{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--muted);font-size:.86rem;line-height:1.5}.note b{color:var(--ink)}@media(min-width:560px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body { margin: 0; -webkit-tap-highlight-color: transparent; }
+/* Layout: scoreboard-style header, then a grid of big pads like a courtside control panel */
+:root {
+  --bg: #EDF1F6;
+  --surface: #FFFFFF;
+  --ink: #11233B;
+  --muted: #5B6B80;
+  --line: #D3DCE7;
+  --court: #1D5FC4;
+  --court-ink: #FFFFFF;
+  --ball: #F4C430;
+  --ball-ink: #11233B;
+  --net: #D8402F;
+  --net-ink: #FFFFFF;
+  --teal: #0F8A7E;
+  --teal-ink: #FFFFFF;
+  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-body: "Barlow", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0C1624; --surface: #15233A; --ink: #E9EFF7; --muted: #92A3BA; --line: #26384F;
+    --court: #3D82E8; --court-ink: #06142A; --ball: #F4C430; --ball-ink: #11233B;
+    --net: #EE6454; --net-ink: #2A0A06; --teal: #2BB5A6; --teal-ink: #04201D;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0C1624; --surface: #15233A; --ink: #E9EFF7; --muted: #92A3BA; --line: #26384F;
+  --court: #3D82E8; --court-ink: #06142A; --ball: #F4C430; --ball-ink: #11233B;
+  --net: #EE6454; --net-ink: #2A0A06; --teal: #2BB5A6; --teal-ink: #04201D;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.4;
+  padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 880px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+header { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: 2.6rem; line-height: 1; margin: 0; letter-spacing: .02em; text-transform: uppercase; text-wrap: balance; }
+h1 span { color: var(--court); }
+.sub { color: var(--muted); font-size: .92rem; margin: 4px 0 0; }
+.bar {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px;
+}
+.vol { display: flex; align-items: center; gap: 10px; flex: 1 1 180px; min-width: 0; }
+.vol label { font-family: var(--font-display); font-weight: 600; text-transform: uppercase; letter-spacing: .08em; font-size: .9rem; color: var(--muted); }
+.vol input { flex: 1; min-width: 0; accent-color: var(--court); height: 32px; }
+.btn {
+  font: 600 .95rem var(--font-body); color: var(--ink); background: transparent;
+  border: 1.5px solid var(--line); border-radius: 8px; padding: 9px 14px; min-height: 44px; cursor: pointer;
+}
+.btn:hover { border-color: var(--muted); }
+.btn.stop { background: var(--net); color: var(--net-ink); border-color: var(--net); }
+.btn.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.btn:focus-visible, .hit:focus-visible, .pad input:focus-visible { outline: 3px solid var(--ball); outline-offset: 2px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 12px; }
+.pad { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.hit {
+  position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; gap: 10px;
+  min-height: 132px; padding: 14px; text-align: left; cursor: pointer;
+  border: 0; border-radius: 12px; background: var(--c); color: var(--ci);
+  box-shadow: 0 3px 0 rgba(0,0,0,.22); transition: transform .06s, box-shadow .06s;
+}
+.hit:active { transform: translateY(3px); box-shadow: 0 0 0 rgba(0,0,0,.22); }
+.hit .name { font-family: var(--font-display); font-weight: 700; font-size: 1.7rem; line-height: 1.02; text-transform: uppercase; overflow-wrap: anywhere; text-wrap: balance; }
+.hit .state { font-size: .8rem; font-weight: 600; letter-spacing: .04em; opacity: .85; }
+.hit .prog { position: absolute; left: 0; bottom: 0; height: 6px; width: 0; background: currentColor; opacity: .55; }
+.hit.empty { background: transparent; color: var(--muted); border: 2px dashed var(--line); box-shadow: none; }
+.hit.playing { outline: 4px solid var(--ink); outline-offset: 2px; }
+.c0 { --c: var(--court); --ci: var(--court-ink); }
+.c1 { --c: var(--ball); --ci: var(--ball-ink); }
+.c2 { --c: var(--net); --ci: var(--net-ink); }
+.c3 { --c: var(--teal); --ci: var(--teal-ink); }
+.edit { display: flex; flex-direction: column; gap: 6px; }
+.edit input { width: 100%; font: 500 1rem var(--font-body); color: var(--ink); background: var(--surface); border: 1.5px solid var(--line); border-radius: 8px; padding: 9px 10px; min-height: 42px; }
+.edit .row { display: flex; gap: 6px; }
+.edit .btn { flex: 1; padding: 8px; min-height: 40px; font-size: .88rem; }
+.add { min-height: 132px; border: 2px dashed var(--line); border-radius: 12px; background: transparent; color: var(--muted); font: 700 1.3rem var(--font-display); text-transform: uppercase; letter-spacing: .06em; cursor: pointer; }
+.note { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; color: var(--muted); font-size: .9rem; display: flex; flex-direction: column; gap: 4px; }
+.note b { color: var(--ink); }
+.msg { min-height: 1.3em; font-size: .9rem; color: var(--net); font-weight: 600; }
+@media (prefers-reduced-motion: reduce) { .hit { transition: none; } }
 </style>
 </head>
-<body><main class="wrap">
-<header><div><h1>БЛОК<span>-ПАД</span></h1><p class="sub">Волейбольна звукова панель</p></div></header>
-<div class="bar"><label class="vol">Гучність <input id="vol" type="range" min="0" max="100" value="90"></label><button class="btn stop" id="stop" type="button">■ Стоп</button><button class="btn" id="edit" type="button" aria-pressed="false">⚙ Налаштувати</button></div>
-<div class="msg" id="msg" role="status"></div><section class="grid" id="grid" aria-label="Звукові кнопки"></section>
-<div class="note"><b>Як користуватися:</b> у «Налаштувати» можна змінити назву кнопки та завантажити аудіофайл з телефона. Натискання нової кнопки зупиняє попередній звук. Для матчу заздалегідь перевірте всі мелодії. Файли зберігаються на цьому пристрої в браузері; не очищайте дані сайту.</div>
+<body>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Блок<span>-Пад</span></h1>
+      <p class="sub">Тисни кнопку, і одразу грає потрібна мелодія.</p>
+    </div>
+  </header>
+
+  <div class="bar">
+    <div class="vol">
+      <label for="vol">Гучність</label>
+      <input id="vol" type="range" min="0" max="100" value="90">
+    </div>
+    <button class="btn stop" id="stopAll" type="button">Стоп</button>
+    <button class="btn" id="editBtn" type="button" aria-pressed="false">Налаштувати</button>
+  </div>
+
+  <div class="msg" id="msg" role="status"></div>
+  <div class="grid" id="grid"></div>
+
+  <div class="note">
+    <span><b>Як налаштувати.</b> Натисни «Налаштувати», потім кнопку «Файл» під потрібною плиткою і вибери MP3 чи інший аудіофайл з телефона. Для плитки «Монстр-блок» вибери свою «Monster Block».</span>
+    <span><b>Перед матчем.</b> Один раз натисни будь-яку кнопку, щоб увімкнути звук, і перевір гучність. Файли зберігаються в цьому браузері на цьому пристрої, але браузер може їх очистити, тому перевір кнопки перед грою. Нова плитка грає замість попередньої.</span>
+  </div>
+</div>
 <input type="file" id="file" accept="audio/*" hidden>
-</main>
+
 <script>
-(()=>{'use strict';
-const DEFAULTS=[{id:'p1',name:'Монстр-блок'},{id:'p2',name:'Ейс'},{id:'p3',name:'Очко'},{id:'p4',name:'Таймаут'},{id:'p5',name:'Заміна'},{id:'p6',name:'Розминка'}];
-let pads=DEFAULTS.map(x=>({...x})),buffers={},editMode=false,targetId=null,ctx=null,master=null,current=null,db=null;
-const grid=document.querySelector('#grid'),msg=document.querySelector('#msg'),file=document.querySelector('#file');
-const say=t=>msg.textContent=t||'';
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function openDB(){return new Promise(resolve=>{try{const r=indexedDB.open('block-pad',1);r.onupgradeneeded=()=>r.result.createObjectStore('pads',{keyPath:'id'});r.onsuccess=()=>{db=r.result;resolve()};r.onerror=()=>resolve()}catch(e){resolve()}})}
-function getAll(){return new Promise(resolve=>{if(!db)return resolve([]);try{const r=db.transaction('pads').objectStore('pads').getAll();r.onsuccess=()=>resolve(r.result||[]);r.onerror=()=>resolve([])}catch(e){resolve([])}})}
-function put(p){return new Promise(resolve=>{if(!db)return resolve();try{const tx=db.transaction('pads','readwrite');tx.objectStore('pads').put(p);tx.oncomplete=tx.onerror=()=>resolve()}catch(e){resolve()}})}
-function del(id){try{if(db)db.transaction('pads','readwrite').objectStore('pads').delete(id)}catch(e){}}
-function ensure(){if(!ctx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)throw Error('Цей браузер не підтримує аудіо');ctx=new AC();master=ctx.createGain();master.gain.value=+document.querySelector('#vol').value/100;master.connect(ctx.destination)}if(ctx.state==='suspended')ctx.resume();return ctx}
-function decode(data){const c=ensure();return new Promise((resolve,reject)=>{const p=c.decodeAudioData(data.slice(0),resolve,reject);if(p&&p.catch)p.catch(reject)})}
-function setPlaying(id){grid.querySelectorAll('.hit').forEach(b=>{const on=b.dataset.id===id;b.classList.toggle('playing',on);const s=b.querySelector('.state');if(s&&buffers[b.dataset.id])s.textContent=on?'▶ Грає':'✓ Готово';if(!on)b.querySelector('.prog').style.width='0'})}
-function stopCurrent(fade=true){if(!current)return;const cur=current;current=null;try{const t=ctx.currentTime;cur.gain.gain.cancelScheduledValues(t);cur.gain.gain.setValueAtTime(cur.gain.gain.value,t);cur.gain.gain.linearRampToValueAtTime(0,t+(fade?.07:.01));cur.src.stop(t+(fade?.08:.02))}catch(e){}setPlaying(null)}
-function play(id){if(!buffers[id])return;try{const c=ensure();stopCurrent();const src=c.createBufferSource(),g=c.createGain();src.buffer=buffers[id];src.connect(g);g.connect(master);src.start();current={id,src,gain:g,start:c.currentTime,dur:src.buffer.duration};src.onended=()=>{if(current&&current.src===src){current=null;setPlaying(null)}};setPlaying(id);tick()}catch(e){say('Не вдалося відтворити звук. Натисніть ще раз.')}}
-function tick(){if(!current)return;const el=grid.querySelector('.hit[data-id="'+CSS.escape(current.id)+'"] .prog');if(el)el.style.width=Math.min(100,(ctx.currentTime-current.start)/current.dur*100)+'%';requestAnimationFrame(tick)}
-function render(){let html='';pads.forEach((p,i)=>{const has=!!buffers[p.id];html+='<div class="pad"><button type="button" class="hit '+(has?'c'+(i%4):'empty')+'" data-id="'+esc(p.id)+'" data-act="hit"><span class="name">'+esc(p.name||'Без назви')+'</span><span class="state">'+(has?'✓ Готово':(editMode?'Додати мелодію':'Немає мелодії'))+'</span><span class="prog"></span></button>';if(editMode)html+='<div class="edit"><input type="text" value="'+esc(p.name)+'" data-name="'+esc(p.id)+'" aria-label="Назва кнопки" maxlength="24"><div class="row"><button class="btn" type="button" data-act="file" data-id="'+esc(p.id)+'">Файл</button><button class="btn" type="button" data-act="del" data-id="'+esc(p.id)+'">Видалити</button></div></div>';html+='</div>'});if(editMode)html+='<button class="add" type="button" data-act="add">＋ Нова кнопка</button>';grid.innerHTML=html;if(current)setPlaying(current.id)}
-function pick(id){targetId=id;file.value='';file.click()}
-grid.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(!t)return;const {act,id}=t.dataset;if(act==='hit'){if(buffers[id])play(id);else if(editMode)pick(id);else say('У цієї кнопки ще немає мелодії. Натисніть «Налаштувати» і додайте файл.')}else if(act==='file')pick(id);else if(act==='del'){if(current&&current.id===id)stopCurrent(false);pads=pads.filter(p=>p.id!==id);delete buffers[id];del(id);render()}else if(act==='add'){const p={id:'p'+Date.now(),name:'Нова мелодія'};pads.push(p);put(p);render()}});
-grid.addEventListener('input',e=>{if(!e.target.matches('[data-name]'))return;const p=pads.find(x=>x.id===e.target.dataset.name);if(!p)return;p.name=e.target.value;const h=grid.querySelector('.hit[data-id="'+CSS.escape(p.id)+'"] .name');if(h)h.textContent=p.name||'Без назви'});
-grid.addEventListener('change',e=>{if(e.target.matches('[data-name]')){const p=pads.find(x=>x.id===e.target.dataset.name);if(p)put(p)}});
-file.addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0];if(!f||!targetId)return;const id=targetId;say('Завантажую «'+f.name+'»…');try{const data=await f.arrayBuffer(),buf=await decode(data);buffers[id]=buf;const p=pads.find(x=>x.id===id);if(p){p.data=data;p.file=f.name;await put(p)}say('Додано: '+f.name);render()}catch(err){say('Не вдалося прочитати файл. Спробуйте MP3, M4A або WAV.')}});
-document.querySelector('#vol').addEventListener('input',e=>{if(master)master.gain.value=+e.target.value/100});
-document.querySelector('#stop').addEventListener('click',()=>{if(ctx)stopCurrent(true);say('')});
-document.querySelector('#edit').addEventListener('click',function(){editMode=!editMode;this.classList.toggle('on',editMode);this.setAttribute('aria-pressed',String(editMode));this.textContent=editMode?'Готово':'⚙ Налаштувати';say('');render()});
-async function start(){render();await openDB();const saved=await getAll();if(saved.length){const map=new Map(saved.map(p=>[p.id,p]));pads=DEFAULTS.map(d=>map.get(d.id)||d).concat(saved.filter(p=>!DEFAULTS.some(d=>d.id===p.id)));}else{pads=DEFAULTS.map(p=>({...p}));}render();for(const p of pads){if(p.data){try{buffers[p.id]=await decode(p.data)}catch(e){}}}render()}
-start();
+(function () {
+  var DEFAULTS = [
+    { id: "p1", name: "Монстр-блок" },
+    { id: "p2", name: "Ейс" },
+    { id: "p3", name: "Очко" },
+    { id: "p4", name: "Таймаут" },
+    { id: "p5", name: "Заміна" },
+    { id: "p6", name: "Розминка" }
+  ];
+  var pads = [], buffers = {}, editMode = false, targetId = null;
+  var ctx = null, master = null, current = null, db = null;
+  var grid = document.getElementById("grid"), msg = document.getElementById("msg");
+
+  function say(t) { msg.textContent = t || ""; }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+  /* ---------- storage (per-device convenience, may be unavailable) ---------- */
+  function openDB() {
+    return new Promise(function (res) {
+      try {
+        var r = indexedDB.open("block-pad", 1);
+        r.onupgradeneeded = function () { r.result.createObjectStore("pads", { keyPath: "id" }); };
+        r.onsuccess = function () { db = r.result; res(); };
+        r.onerror = function () { res(); };
+      } catch (e) { res(); }
+    });
+  }
+  function dbAll() {
+    return new Promise(function (res) {
+      if (!db) return res([]);
+      try {
+        var q = db.transaction("pads").objectStore("pads").getAll();
+        q.onsuccess = function () { res(q.result || []); };
+        q.onerror = function () { res([]); };
+      } catch (e) { res([]); }
+    });
+  }
+  function dbPut(p) {
+    return new Promise(function (res) {
+      if (!db) return res();
+      try {
+        var tx = db.transaction("pads", "readwrite");
+        tx.objectStore("pads").put(p);
+        tx.oncomplete = function () { res(); };
+        tx.onerror = function () { res(); };
+      } catch (e) { res(); }
+    });
+  }
+  function dbDel(id) {
+    return new Promise(function (res) {
+      if (!db) return res();
+      try {
+        var tx = db.transaction("pads", "readwrite");
+        tx.objectStore("pads").delete(id);
+        tx.oncomplete = function () { res(); };
+        tx.onerror = function () { res(); };
+      } catch (e) { res(); }
+    });
+  }
+
+  /* ---------- audio ---------- */
+  function ensureCtx() {
+    if (!ctx) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      ctx = new AC();
+      master = ctx.createGain();
+      master.gain.value = document.getElementById("vol").value / 100;
+      master.connect(ctx.destination);
+    }
+    if (ctx.state === "suspended") ctx.resume();
+    return ctx;
+  }
+  function decode(data) {
+    var c = ensureCtx();
+    return new Promise(function (res, rej) {
+      var p = c.decodeAudioData(data.slice(0), res, rej);
+      if (p && p.catch) p.catch(rej);
+    });
+  }
+  function stopCurrent(fade) {
+    if (!current) return;
+    var cur = current; current = null;
+    try {
+      var t = ctx.currentTime;
+      cur.gain.gain.cancelScheduledValues(t);
+      cur.gain.gain.setValueAtTime(cur.gain.gain.value, t);
+      cur.gain.gain.linearRampToValueAtTime(0, t + (fade ? 0.08 : 0.02));
+      cur.src.stop(t + (fade ? 0.1 : 0.04));
+    } catch (e) {}
+    setPlaying(null);
+  }
+  function play(id) {
+    var buf = buffers[id];
+    if (!buf) return;
+    var c = ensureCtx();
+    stopCurrent(true);
+    var src = c.createBufferSource(), g = c.createGain();
+    src.buffer = buf; src.connect(g); g.connect(master); src.start();
+    current = { id: id, src: src, gain: g, start: c.currentTime, dur: buf.duration };
+    src.onended = function () { if (current && current.src === src) { current = null; setPlaying(null); } };
+    setPlaying(id);
+    tick();
+  }
+  function setPlaying(id) {
+    grid.querySelectorAll(".hit").forEach(function (b) {
+      var on = b.dataset.id === id;
+      b.classList.toggle("playing", on);
+      var st = b.querySelector(".state");
+      if (st && buffers[b.dataset.id]) st.textContent = on ? "Грає" : "Готово";
+      if (!on) b.querySelector(".prog").style.width = "0";
+    });
+  }
+  function tick() {
+    if (!current) return;
+    var b = grid.querySelector('.hit[data-id="' + current.id + '"] .prog');
+    if (b) b.style.width = Math.min(100, (ctx.currentTime - current.start) / current.dur * 100) + "%";
+    requestAnimationFrame(tick);
+  }
+
+  /* ---------- render ---------- */
+  function render() {
+    var html = "";
+    pads.forEach(function (p, i) {
+      var has = !!buffers[p.id];
+      html += '<div class="pad"><button type="button" class="hit ' + (has ? "c" + (i % 4) : "empty") + '" data-id="' + p.id + '" data-act="hit">' +
+        '<span class="name">' + esc(p.name || "Без назви") + '</span>' +
+        '<span class="state">' + (has ? "Готово" : (editMode ? "Додати мелодію" : "Немає мелодії")) + '</span>' +
+        '<span class="prog"></span></button>';
+      if (editMode) {
+        html += '<div class="edit"><input type="text" id="n-' + p.id + '" value="' + esc(p.name) + '" data-id="' + p.id + '" aria-label="Назва кнопки" maxlength="24">' +
+          '<div class="row"><button class="btn" type="button" data-act="file" data-id="' + p.id + '">Файл</button>' +
+          '<button class="btn" type="button" data-act="del" data-id="' + p.id + '">Видалити</button></div></div>';
+      }
+      html += '</div>';
+    });
+    if (editMode) html += '<button class="add" type="button" data-act="add">+ Нова кнопка</button>';
+    grid.innerHTML = html;
+    if (current) setPlaying(current.id);
+  }
+
+  function pickFile(id) { targetId = id; var f = document.getElementById("file"); f.value = ""; f.click(); }
+
+  grid.addEventListener("click", function (e) {
+    var t = e.target.closest("[data-act]");
+    if (!t) return;
+    var act = t.dataset.act, id = t.dataset.id;
+    if (act === "hit") {
+      if (buffers[id]) play(id);
+      else if (editMode) pickFile(id);
+      else say("У цієї кнопки ще немає мелодії. Натисни «Налаштувати» і додай файл.");
+    } else if (act === "file") pickFile(id);
+    else if (act === "del") {
+      if (current && current.id === id) stopCurrent(false);
+      pads = pads.filter(function (p) { return p.id !== id; });
+      delete buffers[id]; dbDel(id); render();
+    } else if (act === "add") {
+      var np = { id: "p" + Date.now(), name: "Нова мелодія" };
+      pads.push(np); dbPut(np); render();
+    }
+  });
+  grid.addEventListener("input", function (e) {
+    if (e.target.matches("input[data-id]")) {
+      var p = pads.filter(function (x) { return x.id === e.target.dataset.id; })[0];
+      if (!p) return;
+      p.name = e.target.value;
+      var h = grid.querySelector('.hit[data-id="' + p.id + '"] .name');
+      if (h) h.textContent = p.name || "Без назви";
+    }
+  });
+  grid.addEventListener("change", function (e) {
+    if (e.target.matches("input[data-id]")) {
+      var p = pads.filter(function (x) { return x.id === e.target.dataset.id; })[0];
+      if (p) dbPut(p);
+    }
+  });
+
+  document.getElementById("file").addEventListener("change", function (e) {
+    var f = e.target.files && e.target.files[0];
+    if (!f || !targetId) return;
+    var id = targetId;
+    say("Завантажую «" + f.name + "»…");
+    f.arrayBuffer().then(function (data) {
+      return decode(data).then(function (buf) {
+        buffers[id] = buf;
+        var p = pads.filter(function (x) { return x.id === id; })[0];
+        if (p) { p.data = data; p.file = f.name; dbPut(p); }
+        say("Додано: " + f.name);
+        render();
+      });
+    }).catch(function () { say("Не вдалося прочитати цей файл. Спробуй MP3 або M4A."); });
+  });
+
+  document.getElementById("vol").addEventListener("input", function (e) {
+    if (master) master.gain.value = e.target.value / 100;
+  });
+  document.getElementById("stopAll").addEventListener("click", function () { if (ctx) stopCurrent(true); });
+  document.getElementById("editBtn").addEventListener("click", function () {
+    editMode = !editMode;
+    this.classList.toggle("on", editMode);
+    this.setAttribute("aria-pressed", editMode);
+    this.textContent = editMode ? "Готово" : "Налаштувати";
+    say(""); render();
+  });
+
+  /* ---------- start ---------- */
+  render();
+  openDB().then(dbAll).then(function (saved) {
+    if (saved.length) {
+      var order = {};
+      DEFAULTS.forEach(function (d, i) { order[d.id] = i; });
+      pads = saved.sort(function (a, b) { return (order[a.id] === undefined ? 99 : order[a.id]) - (order[b.id] === undefined ? 99 : order[b.id]) || (a.id > b.id ? 1 : -1); });
+      var have = {}; pads.forEach(function (p) { have[p.id] = 1; });
+      var seen = pads.length;
+      DEFAULTS.forEach(function (d) { if (!have[d.id] && !seen) pads.push({ id: d.id, name: d.name }); });
+    } else {
+      pads = DEFAULTS.map(function (d) { return { id: d.id, name: d.name }; });
+    }
+    render();
+    var jobs = pads.filter(function (p) { return p.data; }).map(function (p) {
+      return decode(p.data).then(function (b) { buffers[p.id] = b; }).catch(function () {});
+    });
+    Promise.all(jobs).then(render);
+  });
 })();
-</script><script>
-if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-}
 </script>
-</body></html>
+</body>
+</html>
